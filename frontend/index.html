@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Manager</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div>
+                <h1>📋 Task Manager</h1>
+                <p>Sistema de gestión de tareas profesional</p>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div class="login-section" id="loginSection">
+            <h2>🔐 Iniciar Sesión</h2>
+            <div id="loginAlert"></div>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Correo Electrónico</label>
+                    <input type="email" id="email" value="admin@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Contraseña</label>
+                    <input type="password" id="password" value="admin123" required>
+                </div>
+                <button type="submit">Iniciar Sesión</button>
+            </form>
+        </div>
+
+        <!-- App Section -->
+        <div class="app-section" id="appSection">
+            <!-- User Bar -->
+            <div class="user-bar">
+                <div class="user-info">
+                    <div class="avatar">👤</div>
+                    <div>
+                        <div style="font-weight: 700; color: var(--dark);" id="userEmail"></div>
+                        <div style="font-size: 13px; color: var(--gray);">Administrador</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="actions-grid">
+                <div class="action-btn create" onclick="openModal('createModal')">
+                    <div class="action-icon">➕</div>
+                    <div class="action-title">Crear Tarea</div>
+                    <div class="action-desc">Agregar nueva tarea al sistema</div>
+                </div>
+
+                <div class="action-btn search" onclick="openModal('searchModal')">
+                    <div class="action-icon">🔍</div>
+                    <div class="action-title">Buscar por ID</div>
+                    <div class="action-desc">Encontrar tarea específica</div>
+                </div>
+
+                <div class="action-btn edit" onclick="openModal('editModal')">
+                    <div class="action-icon">✏️</div>
+                    <div class="action-title">Editar Tarea</div>
+                    <div class="action-desc">Modificar tarea existente</div>
+                </div>
+
+                <div class="action-btn delete" onclick="openModal('deleteModal')">
+                    <div class="action-icon">🗑️</div>
+                    <div class="action-title">Eliminar Tarea</div>
+                    <div class="action-desc">Borrar tarea del sistema</div>
+                </div>
+
+                <div class="action-btn list" onclick="loadTasks()">
+                    <div class="action-icon">🔄</div>
+                    <div class="action-title">Actualizar Lista</div>
+                    <div class="action-desc">Recargar todas las tareas</div>
+                </div>
+            </div>
+
+            <!-- Tasks List -->
+            <div style="background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+                <h2 style="color: var(--primary); margin-bottom: 25px;">📋 Todas las Tareas</h2>
+                <div id="tasksContainer"></div>
+                <div class="pagination hidden" id="pagination">
+                    <button onclick="previousPage()">← Anterior</button>
+                    <span class="page-info" id="pageInfo"></span>
+                    <button onclick="nextPage()">Siguiente →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Create Task -->
+    <div class="modal" id="createModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">➕ Crear Nueva Tarea</div>
+                <div class="btn-close" onclick="closeModal('createModal')">✕</div>
+            </div>
+            <div id="createAlert"></div>
+            <form id="createForm">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="createTitle" required placeholder="Nombre de la tarea">
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="createDescription" rows="4" placeholder="Detalles de la tarea (opcional)"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="createStatus" required>
+                        <option value="pending">Pendiente</option>
+                        <option value="in progress">En Progreso</option>
+                        <option value="complete">Completada</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-success">Crear Tarea</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Search Task -->
+    <div class="modal" id="searchModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🔍 Buscar Tarea</div>
+                <div class="btn-close" onclick="closeModal('searchModal')">✕</div>
+            </div>
+            <div id="searchAlert"></div>
+            <form id="searchForm">
+                <div class="form-group">
+                    <label>ID de la Tarea</label>
+                    <input type="number" id="searchId" required placeholder="Ej: 1, 2, 3...">
+                </div>
+                <button type="submit">Buscar</button>
+            </form>
+            <div id="searchResult" class="hidden" style="margin-top: 25px;"></div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Task -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">✏️ Editar Tarea</div>
+                <div class="btn-close" onclick="closeModal('editModal')">✕</div>
+            </div>
+            <div id="editAlert"></div>
+            
+            <div id="editSearch">
+                <p style="color: var(--gray); margin-bottom: 15px;">Primero busca la tarea que deseas editar:</p>
+                <form id="editSearchForm">
+                    <div class="form-group">
+                        <label>ID de la Tarea</label>
+                        <input type="number" id="editSearchId" required placeholder="Ej: 1, 2, 3...">
+                    </div>
+                    <button type="submit">Buscar Tarea</button>
+                </form>
+            </div>
+
+            <form id="editForm" class="hidden">
+                <input type="hidden" id="editId">
+                <div class="form-group">
+                    <label>Título</label>
+                    <input type="text" id="editTitle" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="editDescription" rows="4"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Estado</label>
+                    <select id="editStatus" required>
+                        <option value="pending">Pendiente</option>
+                        <option value="in progress">En Progreso</option>
+                        <option value="complete">Completada</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-warning">Guardar Cambios</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Delete Task -->
+    <div class="modal" id="deleteModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">🗑️ Eliminar Tarea</div>
+                <div class="btn-close" onclick="closeModal('deleteModal')">✕</div>
+            </div>
+            <div id="deleteAlert"></div>
+            <form id="deleteForm">
+                <div class="form-group">
+                    <label>ID de la Tarea a Eliminar</label>
+                    <input type="number" id="deleteId" required placeholder="Ej: 1, 2, 3...">
+                </div>
+                <p style="color: var(--danger); font-size: 13px; margin: 15px 0; padding: 10px; background: #f8d7da; border-radius: 6px;">
+                    ⚠️ Esta acción no se puede deshacer
+                </p>
+                <button type="submit" class="btn-danger">Eliminar Tarea</button>
+            </form>
+        </div>
+    </div>
+<script src="index.js"></script>
+</body>
+</html>
